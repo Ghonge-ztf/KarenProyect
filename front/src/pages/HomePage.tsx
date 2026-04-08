@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function HomePage() {
   const [contenedores, setContenedores] = useState<string[]>([''])
-
+  const navigate = useNavigate();
 
   const getContenedores = async () => {
     await axios.get("http://localhost:4567/contenedores/todos")
@@ -35,7 +36,12 @@ export default function HomePage() {
           {contenedores.length > 0 && (
             <div className="button-grid">
               {contenedores.map((item) => (
-                <button type="button" className="btn">{item}</button>
+                <button
+                key={item} 
+                type="button" 
+                className="btn"
+                onClick={()=>{navigate(`/contenedor/${item}`)}}
+                >{item}</button>
               ))}
             </div>
           )}
