@@ -1,0 +1,301 @@
+:root {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #52606d;
+  background:
+    radial-gradient(circle at top, rgba(255, 245, 248, 0.95), transparent 35%),
+    linear-gradient(180deg, #fffdfc 0%, #f8fbff 100%);
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --page-bg: #f8fbff;
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-strong: #ffffff;
+  --surface-muted: #fef6f8;
+  --border: rgba(210, 217, 230, 0.85);
+  --shadow: 0 18px 40px rgba(213, 220, 235, 0.35);
+  --text-main: #4f5d6b;
+  --text-soft: #768495;
+  --title-main: #7d6b85;
+  --title-soft: #927e90;
+  --accent-create: #c7e8d1;
+  --accent-create-strong: #7ab693;
+  --accent-delete: #f4d1d6;
+  --accent-delete-strong: #cf8897;
+  --accent-move: #d8def7;
+  --accent-move-strong: #8d99d6;
+  --table-head: #f8eef4;
+  --table-row: rgba(255, 255, 255, 0.92);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text-main);
+  background: var(--page-bg);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin-top: 0;
+}
+
+h2 {
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.8rem, 2vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--title-main);
+}
+
+h3 {
+  margin-bottom: 0.65rem;
+  font-size: clamp(1.15rem, 1.5vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: 0.015em;
+  color: var(--title-soft);
+}
+
+/* Contenedor exterior de toda la pagina; aporta alto completo y espacio alrededor del contenido. */
+.page-shell {
+  min-height: 100vh;
+  padding: 3rem 1.5rem;
+}
+
+/* Contenedor central que limita el ancho y organiza las secciones internas con separacion uniforme. */
+.page-container {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 1.5rem;
+}
+
+/* Tarjeta base reutilizable para bloques de contenido con fondo, borde redondeado y sombra suave. */
+.panel {
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--surface);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+}
+
+/* Variante visual de panel con un fondo mas delicado para secciones secundarias o destacadas. */
+.panel-muted {
+  background: linear-gradient(180deg, rgba(255, 248, 250, 0.95), rgba(255, 255, 255, 0.82));
+}
+
+/* Texto introductorio o descriptivo con ancho comodo de lectura y color menos intenso. */
+.lead-text {
+  max-width: 60ch;
+  margin: 0;
+  color: var(--text-soft);
+}
+
+/* Barra flexible para agrupar acciones o controles con salto de linea en pantallas pequenas. */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+}
+
+/* Contenedor en grid para distribuir botones o acciones en columnas adaptables. */
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  align-items: stretch;
+}
+
+.button-grid .btn {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .button-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .button-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Estilo base para todos los botones reutilizables del sistema. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 120px;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(201, 207, 224, 0.28);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* Boton para acciones de creacion; usa la paleta verde suave del tema. */
+.btn-create {
+  background: var(--accent-create);
+  border-color: rgba(122, 182, 147, 0.25);
+  color: #426b57;
+}
+
+/* Boton para acciones de eliminacion; usa la paleta rosada para alertar sin ser agresivo. */
+.btn-delete {
+  background: var(--accent-delete);
+  border-color: rgba(207, 136, 151, 0.22);
+  color: #8f5866;
+}
+
+/* Boton para acciones de mover o reorganizar elementos; usa la paleta azul del tema. */
+.btn-move {
+  background: var(--accent-move);
+  border-color: rgba(141, 153, 214, 0.22);
+  color: #5f6aa6;
+}
+
+/* Estado hover del boton de crear para dar retroalimentacion visual al usuario. */
+.btn-create:hover {
+  background: color-mix(in srgb, var(--accent-create) 82%, white 18%);
+}
+
+/* Estado hover del boton de eliminar para resaltar la interaccion. */
+.btn-delete:hover {
+  background: color-mix(in srgb, var(--accent-delete) 82%, white 18%);
+}
+
+/* Estado hover del boton de mover para indicar que la accion esta disponible. */
+.btn-move:hover {
+  background: color-mix(in srgb, var(--accent-move) 82%, white 18%);
+}
+
+/* Envoltura visual de la tabla; agrega borde, recorte y sombra para presentarla como tarjeta. */
+.table-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--surface-strong);
+  box-shadow: 0 16px 34px rgba(214, 220, 234, 0.24);
+}
+
+/* Tabla principal con ancho completo y bordes colapsados para una lectura limpia. */
+.soft-table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+}
+
+.soft-table thead {
+  background: var(--table-head);
+}
+
+.soft-table th,
+.soft-table td {
+  padding: 1rem 1.15rem;
+  text-align: left;
+}
+
+.soft-table th {
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--title-soft);
+}
+
+.soft-table tbody tr {
+  background: var(--table-row);
+  transition: background-color 0.2s ease;
+}
+
+.soft-table tbody tr:nth-child(even) {
+  background: #fff9fb;
+}
+
+.soft-table tbody tr:hover {
+  background: #fdf3f7;
+}
+
+.soft-table tbody tr + tr td {
+  border-top: 1px solid rgba(232, 236, 244, 0.9);
+}
+
+/* Etiqueta tipo pastilla para mostrar estados cortos o categorias dentro de la interfaz. */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: var(--surface-muted);
+  color: var(--title-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .page-shell {
+    padding: 1.5rem 1rem;
+  }
+
+  .panel {
+    padding: 1.2rem;
+  }
+
+  .soft-table th,
+  .soft-table td {
+    padding: 0.85rem 0.8rem;
+    font-size: 0.95rem;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}
