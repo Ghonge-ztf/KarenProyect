@@ -9,7 +9,7 @@ if (Number.isNaN(port)) {
   throw new Error("PORT debe ser un número válido");
 }
 const mongoUri = process.env.MONGODB_URI ?? "mongodb://localhost:27017/";
-const mongoDb = process.env.MONGODB_DB ?? "karen_gamma";
+const mongoDb = process.env.MONGODB_DB ?? "KarenDb";
 
 // console.log(`base de datos: ${mongoDb}`);
 

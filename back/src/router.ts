@@ -4,7 +4,7 @@ import {
   actualizarArticulo,
   eliminarArticulo,
 } from "./handlers/registroR";
-import { getArticulos } from "./handlers/accionesR";
+import { getArticulos, getContenedores } from "./handlers/accionesR";
 
 const router = Router();
 
@@ -16,5 +16,9 @@ router.post("/articulos", crearArticulo);
 router.put("/articulos/:id", actualizarArticulo);
 router.delete("/articulos/:id", eliminarArticulo);  
 router.get("/articulos/todos", getArticulos);
+router.get("/contenedores/todos", getContenedores)
+
+
+//(req, res) => { res.send("en trabajo")}
 
 export default router;
