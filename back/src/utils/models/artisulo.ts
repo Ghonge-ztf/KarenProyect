@@ -12,5 +12,7 @@ export interface ArtisuloDocument extends Artisulo {
 }
 
 export interface Historial {
-
+  codigo: string
+  cantidad: number
+  contenedor: string[]
 }

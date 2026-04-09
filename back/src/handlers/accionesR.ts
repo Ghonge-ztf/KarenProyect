@@ -1,8 +1,16 @@
 import { Request, Response } from "express";
-import { getArtisulosCollection } from "../utils/mongo";
+import { getArtisulosCollection, getHistorialCollection } from "../utils/mongo";
+import { Artisulo, Historial } from "../utils/models/artisulo";
 
 
 const collection = () => getArtisulosCollection();
+const historial = () => getHistorialCollection();
+
+
+//TODO: validar los datos que se envian a moverArticulo
+const Validacion = () =>{
+
+}
 
 
 export const getArticulos = async (req: Request, res: Response) => {
@@ -54,3 +62,41 @@ export const getContenedores = async (req: Request, res: Response) => {
 
 
 }
+
+export const moveArticulo = async (req: Request, res: Response) => {
+
+    try{
+        const { data, contenedorN } = req.body;
+        const articulo: Artisulo = data;
+        
+        const datosC: Historial = await historial().findOne({codigo: articulo.contenedor})
+
+        if(!datosC){
+
+            const productoHistorial: Historial = {
+                codigo: articulo.codigo,
+                cantidad: articulo.cantidad,
+                contenedor: ['']
+            } 
+
+            productoHistorial.contenedor.push(articulo.contenedor);
+            productoHistorial.contenedor.push(contenedorN);
+            const result = await historial().insertOne(productoHistorial);
+
+            result ? res.status(201).json({message: "historial registrado"}) : res.status(400).json({message: "Error al crear el historial de articulo"});
+
+        }else{
+            
+            datosC.contenedor.push(contenedorN)
+            const result = await historial().updateOne({codigo: articulo.codigo}, {$set: datosC});
+
+
+            result ? res.status(200).json({message: "historial registrado"}) : res.status(400).json({message: "Error al registrar el historial de articulo"});
+        }
+
+
+    }catch(error){
+        return res.status(500).json({ menssage: error.message })
+    }
+
+} 

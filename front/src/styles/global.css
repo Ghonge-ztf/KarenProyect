@@ -280,6 +280,83 @@ h3 {
   font-weight: 600;
 }
 
+/* Capa fija que oscurece y difumina el fondo cuando un modal esta abierto. */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(126, 136, 156, 0.26);
+  backdrop-filter: blur(10px);
+}
+
+/* Tarjeta central del modal; reusa la misma superficie suave del sistema visual. */
+.modal-card {
+  width: min(560px, 100%);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: linear-gradient(180deg, rgba(255, 248, 250, 0.96), rgba(255, 255, 255, 0.9));
+  box-shadow: 0 24px 55px rgba(168, 177, 198, 0.28);
+}
+
+/* Encabezado del modal con separacion entre titulo y accion de cierre. */
+.modal-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-header h3 {
+  margin-bottom: 0;
+}
+
+/* Boton compacto de cierre con tratamiento visual consistente con la interfaz. */
+.modal-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 1px solid rgba(207, 136, 151, 0.2);
+  border-radius: 999px;
+  background: var(--accent-delete);
+  color: #8f5866;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.modal-close:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--accent-delete) 82%, white 18%);
+  box-shadow: 0 10px 22px rgba(207, 136, 151, 0.18);
+}
+
+.modal-close:active {
+  transform: translateY(0);
+}
+
+/* Cuerpo del modal con espacio comodo para formularios o mensajes. */
+.modal-body {
+  color: var(--text-main);
+}
+
+/* Pie del modal para acciones principales y secundarias. */
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
 @media (max-width: 768px) {
   .page-shell {
     padding: 1.5rem 1rem;
@@ -296,6 +373,23 @@ h3 {
   }
 
   .btn {
+    width: 100%;
+  }
+
+  .modal-overlay {
+    padding: 1rem;
+  }
+
+  .modal-card {
+    padding: 1.2rem;
+    border-radius: 24px;
+  }
+
+  .modal-actions {
+    justify-content: stretch;
+  }
+
+  .modal-actions > * {
     width: 100%;
   }
 }
