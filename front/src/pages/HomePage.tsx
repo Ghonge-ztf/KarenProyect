@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 export default function HomePage() {
-  const [contenedores, setContenedores] = useState<string[]>([''])
+  const [contenedores, setContenedores] = useState<string[]>(['']);
   const navigate = useNavigate();
 
   const getContenedores = async () => {
     await axios.get("http://localhost:4567/contenedores/todos")
-      .then((res) => { setContenedores(res.data.contenedores) })
+      .then((res) => { setContenedores(res.data.contenido) })
       .catch(console.error);
 
   }

@@ -15,7 +15,7 @@ router.get("/", (_req, res) => {
 router.post("/articulos", crearArticulo);
 router.put("/articulos/:id", actualizarArticulo);
 router.delete("/articulos/:id", eliminarArticulo);  
-router.get("/articulos/todos", getArticulos);
+router.get("/contenedor/articulos", getArticulos);
 router.get("/contenedores/todos", getContenedores)
 
 
