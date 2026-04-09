@@ -39,6 +39,17 @@ export default function ContenedorPage() {
             .catch(console.error);
     }
 
+    const [contenedores, setContenedores] = useState<string[]>(['']);
+
+    const getContenedores = async () => {
+        await axios.get("http://localhost:4567/contenedores/todos")
+            .then((res) => {
+                setContenedores(res.data.contenido)
+            })
+            .catch(console.error);
+
+    }
+
     const abrirModal = (articulo: IArticulo) => {
         setArticuloSeleccionado(articulo);
         setModal(true);
@@ -50,49 +61,8 @@ export default function ContenedorPage() {
     }
 
 
-    // function ItemArrastrable(codigo: string) {
-    //     const handleDragStart = (event: React.DragEvent<HTMLDivElement>) => {
 
-    //         const payload = {
-    //             codigo: codigo
-    //         }
-
-    //         event.dataTransfer.setData("application/json", JSON.stringify(payload));
-    //     }
-
-    //     return (
-    //         <div draggable onDragStart={handleDragStart}>
-    //             Articulo: {codigo}
-    //         </div>
-    //     )
-    // }
-
-    // function ZonaDestino(contenedor: string) {
-    //     const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    //         event.preventDefault();
-    //         set
-    //     }
-
-    //     const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    //         event.preventDefault();
-
-    //         const raw = event.dataTransfer.getData("application/json");
-    //         const data = JSON.parse(raw);
-
-    //         console.log(data.codigo);
-    //     };
-
-    //     return (
-    //         <div onDragOver={handleDragOver} onDrop={handleDrop}>
-    //             suelta aqui
-    //         </div>
-    //     )
-
-    // }
-
-
-
-    useEffect(() => { getArticulos() }, [])
+    useEffect(() => { getArticulos(); getContenedores(); }, [])
 
 
     return (
@@ -130,6 +100,7 @@ export default function ContenedorPage() {
                                                         codigo: articulo.codigo
                                                     })
                                                 )
+                                                setDragOver(true);
                                             }}
 
                                         >
@@ -144,21 +115,30 @@ export default function ContenedorPage() {
                         </table>
                     </div>
 
-                    <section className="panel" style={{marginTop:"10px"}}>
-                        <div
-                        onDragOver={(event)=>{event.preventDefault()}}
-                        onDrop={(event)=> {
-                            event.preventDefault();
+                    {dragOver && <section className="panel" style={{ marginTop: "10px" }}>
 
-                            const raw = event.dataTransfer.getData("application/json");
-                            const data = JSON.stringify(raw);
-                            console.log(data);
-                            
-                        }}
-                        >
-                            contenedor
-                        </div>
-                    </section>
+
+                        {
+                            contenedores.map((contenedor) => (
+                                <div
+                                    key={contenedor}
+                                    onDragOver={(event) => { event.preventDefault() }}
+                                    onDrop={(event) => {
+                                        event.preventDefault();
+
+                                        const raw = event.dataTransfer.getData("application/json");
+                                        const data = JSON.stringify(raw);
+                                        console.log(data);
+                                        setDragOver(false);
+
+                                    }}
+                                >
+                                    {contenedor}
+                                </div>
+                            ))
+                        }
+                    </section>}
+
 
 
                     <Modal

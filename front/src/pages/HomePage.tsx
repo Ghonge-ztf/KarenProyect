@@ -8,7 +8,9 @@ export default function HomePage() {
 
   const getContenedores = async () => {
     await axios.get("http://localhost:4567/contenedores/todos")
-      .then((res) => { setContenedores(res.data.contenido) })
+      .then((res) => { 
+        setContenedores(res.data.contenido) 
+      })
       .catch(console.error);
 
   }
