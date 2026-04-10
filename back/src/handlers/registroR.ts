@@ -45,6 +45,35 @@ export const crearArticulo = async (req: Request, res: Response) => {
       });
     }
 
+    const articuloExistente = await collection().findOne({
+      contenedor: contenedorLimpio,
+      codigo: codigoLimpio,
+    });
+
+    if (articuloExistente) {
+      const cantidadActualizada = articuloExistente.cantidad + parsedCantidad;
+      const result = await collection().updateOne(
+        { _id: articuloExistente._id },
+        {
+          $set: {
+            cantidad: cantidadActualizada,
+            descripcion: descripcionLimpia || articuloExistente.descripcion,
+          },
+        }
+      );
+
+      if (result.modifiedCount === 0) {
+        return res.status(500).json({ message: "Error al actualizar artículo existente" });
+      }
+
+      return res.status(200).json({
+        message: "Artículo existente actualizado con nueva cantidad",
+        codigo: codigoLimpio,
+        contenedor: contenedorLimpio,
+        cantidad: cantidadActualizada,
+      });
+    }
+
     const nuevoArticulo: Artisulo = {
       contenedor: contenedorLimpio,
       cantidad: parsedCantidad,

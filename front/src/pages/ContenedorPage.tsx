@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ChangeEvent } from "react"
 import { useParams } from "react-router-dom"
 import type { IArticulo } from "../utils/models/articulo"
 import axios from "axios";
@@ -22,16 +22,21 @@ export default function ContenedorPage() {
     const [modal, setModal] = useState<boolean>(false);
     const [dragOver, setDragOver] = useState<boolean>(false);
     const [articuloSeleccionado, setArticuloSeleccionado] = useState<IArticulo | null>(null);
-    const [articulos, setArticulos] = useState<IArticulo[]>(
-        [
-            {
-                codigo: "no hay",
-                cantidad: 0,
-                descripcion: "no hay",
-                contenedor: "no hay"
-            }
-        ]
-    );
+    const [articulos, setArticulos] = useState<IArticulo[]>([
+        {
+            codigo: "no hay",
+            cantidad: 0,
+            descripcion: "no hay",
+            contenedor: "no hay"
+        }
+    ]);
+    const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
+    const [formError, setFormError] = useState<string>("");
+    const [newArticulo, setNewArticulo] = useState({
+        codigo: "",
+        cantidad: 0,
+        descripcion: "",
+    });
     const { id } = useParams()
 
     const getArticulos = async () => {
@@ -69,6 +74,60 @@ export default function ContenedorPage() {
 
 
 
+    const handleNewArticuloChange = (
+        field: "codigo" | "cantidad" | "descripcion"
+    ) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const value = field === "cantidad"
+            ? Number(event.target.value)
+            : event.target.value;
+
+        setNewArticulo((prev) => ({ ...prev, [field]: value }));
+    }
+
+    const closeCreateModal = () => {
+        setCreateModalOpen(false);
+        setNewArticulo({ codigo: "", cantidad: 0, descripcion: "" });
+        setFormError("");
+    }
+
+    const crearArticulo = async () => {
+        if (!id) return;
+
+        const codigo = newArticulo.codigo.trim();
+        const descripcion = newArticulo.descripcion.trim();
+        const cantidad = Number(newArticulo.cantidad);
+
+        if (!codigo || !descripcion || cantidad <= 0) {
+            setFormError("Completa el código, la cantidad mayor a 0 y la descripción.");
+            return;
+        }
+
+        const existeArticulo = articulos.find(
+            (item) => item.codigo.toLowerCase() === codigo.toLowerCase()
+        );
+
+        if (existeArticulo) {
+            setFormError(
+                "Artículo existente encontrado. Se sumará la cantidad al artículo actual."
+            );
+        }
+
+        await axios.post("http://localhost:4567/articulos", {
+            contenedor: id,
+            codigo,
+            cantidad,
+            descripcion,
+        })
+            .then(() => {
+                getArticulos();
+                closeCreateModal();
+            })
+            .catch((error) => {
+                console.error(error);
+                setFormError("Error al crear el artículo. Revisa los datos e intenta de nuevo.");
+            });
+    }
+
     const abrirModal = (articulo: IArticulo) => {
         setArticuloSeleccionado(articulo);
         setModal(true);
@@ -94,7 +153,16 @@ export default function ContenedorPage() {
                 </section>
 
                 <section className="panel">
-                    <h3>Articulos</h3>
+                    <div className="panel-header">
+                        <h3>Articulos</h3>
+                        <button
+                            type="button"
+                            className="btn btn-create"
+                            onClick={() => setCreateModalOpen(true)}
+                        >
+                            Crear artículo
+                        </button>
+                    </div>
                     <div className="table-card">
                         <table className="soft-table">
                             <thead>
@@ -136,7 +204,88 @@ export default function ContenedorPage() {
                     </div>
 
 
-                    {dragOver && <section className="panel" style={{ marginTop: "10px" }}>
+                    
+
+
+
+                    <Modal
+                        isOpen={createModalOpen}
+                        onClose={closeCreateModal}
+                        title="Crear artículo"
+                        actions={
+                            <>
+                                <button type="button" className="btn btn-create" onClick={crearArticulo}>
+                                    Crear
+                                </button>
+                                <button type="button" className="btn" onClick={closeCreateModal}>
+                                    Cancelar
+                                </button>
+                            </>
+                        }
+                    >
+                        <div className="modal-form">
+                            <p>
+                                <strong>Contenedor:</strong> {id}
+                            </p>
+                            <p>
+                                <label htmlFor="new-codigo">
+                                    Código:
+                                    <input
+                                        id="new-codigo"
+                                        type="text"
+                                        value={newArticulo.codigo}
+                                        onChange={handleNewArticuloChange("codigo")}
+                                    />
+                                </label>
+                            </p>
+                            <p>
+                                <label htmlFor="new-cantidad">
+                                    Cantidad:
+                                    <input
+                                        id="new-cantidad"
+                                        type="number"
+                                        min="1"
+                                        value={newArticulo.cantidad || ""}
+                                        onChange={handleNewArticuloChange("cantidad")}
+                                    />
+                                </label>
+                            </p>
+                            <p>
+                                <label htmlFor="new-descripcion">
+                                    Descripción:
+                                    <textarea
+                                        id="new-descripcion"
+                                        value={newArticulo.descripcion}
+                                        onChange={handleNewArticuloChange("descripcion")}
+                                    />
+                                </label>
+                            </p>
+                            {formError ? <p className="form-error">{formError}</p> : null}
+                        </div>
+                    </Modal>
+
+                    <Modal
+                        isOpen={modal}
+                        onClose={cerrarModal}
+                        title={articuloSeleccionado ? `Articulo: ${articuloSeleccionado.codigo}` : "Articulo"}
+                        actions={
+                            <button type="button" className="btn btn-create" onClick={cerrarModal}>
+                                Guardar
+                            </button>
+                        }
+                    >
+                        {articuloSeleccionado && (
+                            <div>
+                                <p><strong>Codigo:</strong> <input id="codigo" type="text" placeholder={articuloSeleccionado.codigo}></input> </p> 
+                                <p><strong>Cantidad:</strong> <input id="cantidad" type="number" placeholder={articuloSeleccionado.cantidad.toString()}></input></p>
+                                <p><strong>Descripcion:</strong> <textarea id="descripcion" placeholder={articuloSeleccionado.descripcion}></textarea></p>
+                                <p><strong>Contenedor:</strong> {articuloSeleccionado.contenedor}</p>
+                            </div>
+                        )}
+                    </Modal>
+
+                </section>
+                {dragOver && <section className="panel contenedores-panel" style={{ marginTop: "10px" }}>
 
 
                         {
@@ -166,30 +315,6 @@ export default function ContenedorPage() {
                             ))
                         }
                     </section>}
-
-
-
-                    <Modal
-                        isOpen={modal}
-                        onClose={cerrarModal}
-                        title={articuloSeleccionado ? `Articulo: ${articuloSeleccionado.codigo}` : "Articulo"}
-                        actions={
-                            <button type="button" className="btn btn-move" onClick={cerrarModal}>
-                                Cerrar
-                            </button>
-                        }
-                    >
-                        {articuloSeleccionado && (
-                            <div>
-                                <p><strong>Codigo:</strong> {articuloSeleccionado.codigo}</p>
-                                <p><strong>Cantidad:</strong> {articuloSeleccionado.cantidad}</p>
-                                <p><strong>Descripcion:</strong> {articuloSeleccionado.descripcion}</p>
-                                <p><strong>Contenedor:</strong> {articuloSeleccionado.contenedor}</p>
-                            </div>
-                        )}
-                    </Modal>
-
-                </section>
 
 
             </div>

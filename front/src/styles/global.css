@@ -99,9 +99,19 @@ h3 {
   display: grid;
   gap: 1.5rem;
 }
+
+/*paneles para el dropzone*/
 .contenedores-wrapper {
   display: flex;
   justify-content: flex-end;
+}
+
+.contenedores-panel {
+  position: fixed;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 320px;
 }
 
 /* Tarjeta base reutilizable para bloques de contenido con fondo, borde redondeado y sombra suave. */
