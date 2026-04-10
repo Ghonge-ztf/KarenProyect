@@ -4,7 +4,7 @@ import {
   actualizarArticulo,
   eliminarArticulo,
 } from "./handlers/registroR";
-import { getArticulos, getContenedores } from "./handlers/accionesR";
+import { getArticulos, getContenedores, moveArticulo } from "./handlers/accionesR";
 
 const router = Router();
 
@@ -13,9 +13,10 @@ router.get("/", (_req, res) => {
 });
 
 router.post("/articulos", crearArticulo);
+router.post("/articulos/mover", moveArticulo);
 router.put("/articulos/:id", actualizarArticulo);
 router.delete("/articulos/:id", eliminarArticulo);  
-router.get("/contenedor/articulos", getArticulos);
+router.get("/contenedores/articulos", getArticulos);
 router.get("/contenedores/todos", getContenedores)
 
 

@@ -67,23 +67,29 @@ export const moveArticulo = async (req: Request, res: Response) => {
 
     try{
         const { data, contenedorN } = req.body;
-        const articulo: Artisulo = data;
+        const articulo: Artisulo = data.articulo;
         
-        const datosC: Historial = await historial().findOne({codigo: articulo.contenedor})
+        const datosC: Historial = await historial().findOne({codigo: articulo.codigo});
 
-        if(!datosC){
+        if( data.articulo.codigo == undefined || contenedorN == undefined){
+            res.status(200).json({message: "error move articulo"});
+        }
+
+        if(datosC == null){
 
             const productoHistorial: Historial = {
                 codigo: articulo.codigo,
                 cantidad: articulo.cantidad,
-                contenedor: ['']
+                contenedor: []
             } 
+
+            console.log("producto ",productoHistorial);
 
             productoHistorial.contenedor.push(articulo.contenedor);
             productoHistorial.contenedor.push(contenedorN);
             const result = await historial().insertOne(productoHistorial);
 
-            result ? res.status(201).json({message: "historial registrado"}) : res.status(400).json({message: "Error al crear el historial de articulo"});
+            result.acknowledged ? res.status(201).json({message: "historial registrado"}) : res.status(400).json({message: "Error al crear el historial de articulo"});
 
         }else{
             
@@ -91,12 +97,12 @@ export const moveArticulo = async (req: Request, res: Response) => {
             const result = await historial().updateOne({codigo: articulo.codigo}, {$set: datosC});
 
 
-            result ? res.status(200).json({message: "historial registrado"}) : res.status(400).json({message: "Error al registrar el historial de articulo"});
+            result.matchedCount === 1 ? res.status(200).json({message: "historial registrado"}) : res.status(400).json({message: "Error al registrar el historial de articulo"});
         }
 
 
     }catch(error){
-        return res.status(500).json({ menssage: error.message })
+        return res.status(500).json({ menssage: error })
     }
 
 } 

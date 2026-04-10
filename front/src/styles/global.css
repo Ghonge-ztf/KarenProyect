@@ -99,6 +99,10 @@ h3 {
   display: grid;
   gap: 1.5rem;
 }
+.contenedores-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
 
 /* Tarjeta base reutilizable para bloques de contenido con fondo, borde redondeado y sombra suave. */
 .panel {

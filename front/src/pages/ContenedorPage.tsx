@@ -8,6 +8,11 @@ interface IResultado {
     contenido: IArticulo[]
 }
 
+interface IMoveArticuloProp {
+    articulo: IArticulo,
+    contenedorNue: string
+}
+
 // interface IPayload {
 //     codigo: string
 //     de
@@ -30,7 +35,7 @@ export default function ContenedorPage() {
     const { id } = useParams()
 
     const getArticulos = async () => {
-        await axios.get<IResultado>("http://localhost:4567/contenedor/articulos", {
+        await axios.get<IResultado>("http://localhost:4567/contenedores/articulos", {
             params: {
                 contenedor: id
             }
@@ -50,6 +55,20 @@ export default function ContenedorPage() {
 
     }
 
+    const moveArticulo = async ({ articulo, contenedorNue }: IMoveArticuloProp) => {
+        await axios.post("http://localhost:4567/articulos/mover",
+            {
+                data: articulo,
+                contenedorN: contenedorNue
+            }
+        )
+            .then((res) => { console.log(res.data) })
+            .catch(console.error);
+    }
+
+
+
+
     const abrirModal = (articulo: IArticulo) => {
         setArticuloSeleccionado(articulo);
         setModal(true);
@@ -59,6 +78,8 @@ export default function ContenedorPage() {
         setModal(false);
         setArticuloSeleccionado(null);
     }
+
+
 
 
 
@@ -90,15 +111,14 @@ export default function ContenedorPage() {
                                     articulos.map((articulo) => (
                                         <tr key={articulo.codigo}
                                             onClick={() => { abrirModal(articulo) }}
+                                            // onClick={() => { abrirModal(articulo) }}
                                             style={{ cursor: "pointer" }}
 
                                             draggable
                                             onDragStart={(event) => {
                                                 event.dataTransfer.setData(
                                                     "application/json",
-                                                    JSON.stringify({
-                                                        codigo: articulo.codigo
-                                                    })
+                                                    JSON.stringify({ articulo })
                                                 )
                                                 setDragOver(true);
                                             }}
@@ -115,25 +135,33 @@ export default function ContenedorPage() {
                         </table>
                     </div>
 
+
                     {dragOver && <section className="panel" style={{ marginTop: "10px" }}>
 
 
                         {
                             contenedores.map((contenedor) => (
-                                <div
+                                contenedor == id ? <p></p> : <div
                                     key={contenedor}
                                     onDragOver={(event) => { event.preventDefault() }}
+                                    className="panel contenedores-wrapper"
                                     onDrop={(event) => {
                                         event.preventDefault();
 
                                         const raw = event.dataTransfer.getData("application/json");
-                                        const data = JSON.stringify(raw);
+                                        const data = JSON.parse(raw);
                                         console.log(data);
                                         setDragOver(false);
 
+                                        const props: IMoveArticuloProp = {
+                                            articulo: data,
+                                            contenedorNue: contenedor
+                                        }
+                                        moveArticulo(props);
+
                                     }}
                                 >
-                                    {contenedor}
+                                    <h3>{contenedor}</h3>
                                 </div>
                             ))
                         }
