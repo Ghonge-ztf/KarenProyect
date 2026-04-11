@@ -9,14 +9,17 @@ interface IResultado {
 }
 
 interface IMoveArticuloProp {
-    articulo: IArticulo,
-    contenedorNue: string
+    articuloId: string;
+    codigo: string;
+    contenedorActual: string;
+    contenedorNue: string;
 }
 
-// interface IPayload {
-//     codigo: string
-//     de
-// }
+interface IEditArticulo {
+    codigo: string;
+    cantidad: number;
+    descripcion: string;
+}
 
 export default function ContenedorPage() {
     const [modal, setModal] = useState<boolean>(false);
@@ -33,6 +36,11 @@ export default function ContenedorPage() {
     const [createModalOpen, setCreateModalOpen] = useState<boolean>(false);
     const [formError, setFormError] = useState<string>("");
     const [newArticulo, setNewArticulo] = useState({
+        codigo: "",
+        cantidad: 0,
+        descripcion: "",
+    });
+    const [editArticulo, setEditArticulo] = useState<IEditArticulo>({
         codigo: "",
         cantidad: 0,
         descripcion: "",
@@ -60,14 +68,15 @@ export default function ContenedorPage() {
 
     }
 
-    const moveArticulo = async ({ articulo, contenedorNue }: IMoveArticuloProp) => {
-        await axios.post("http://localhost:4567/articulos/mover",
-            {
-                data: articulo,
-                contenedorN: contenedorNue
-            }
-        )
-            .then((res) => { console.log(res.data) })
+    const moveArticulo = async ({ articuloId, contenedorNue }: IMoveArticuloProp) => {
+        await axios.post("http://localhost:4567/articulos/mover", {
+            articuloId,
+            contenedorN: contenedorNue,
+        })
+            .then(() => {
+                getArticulos();
+                getContenedores();
+            })
             .catch(console.error);
     }
 
@@ -128,8 +137,58 @@ export default function ContenedorPage() {
             });
     }
 
+    const handleEditArticuloChange = (
+        field: "codigo" | "cantidad" | "descripcion"
+    ) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const value = field === "cantidad"
+            ? Number(event.target.value)
+            : event.target.value;
+
+        setEditArticulo((prev) => ({ ...prev, [field]: value }));
+    }
+
+    const guardarArticulo = async () => {
+        if (!articuloSeleccionado) return;
+
+        const codigo = editArticulo.codigo.trim();
+        const descripcion = editArticulo.descripcion.trim();
+        const cantidad = Number(editArticulo.cantidad);
+        const articuloId = String(articuloSeleccionado._id ?? "");
+
+        if (!codigo || !descripcion || cantidad <= 0) {
+            setFormError("Completa el código, la cantidad mayor a 0 y la descripción.");
+            return;
+        }
+
+        if (!articuloId) {
+            setFormError("No se encontró el identificador del artículo.");
+            return;
+        }
+
+        await axios.put(`http://localhost:4567/articulos/${articuloId}`, {
+            id: articuloId,
+            codigo,
+            cantidad,
+            descripcion,
+        })
+            .then(() => {
+                getArticulos();
+                cerrarModal();
+            })
+            .catch((error) => {
+                console.error(error);
+                setFormError("Error al actualizar el artículo. Revisa los datos e intenta de nuevo.");
+            });
+    }
+
     const abrirModal = (articulo: IArticulo) => {
         setArticuloSeleccionado(articulo);
+        setEditArticulo({
+            codigo: articulo.codigo,
+            cantidad: articulo.cantidad,
+            descripcion: articulo.descripcion,
+        });
+        setFormError("");
         setModal(true);
     }
 
@@ -160,7 +219,7 @@ export default function ContenedorPage() {
                             className="btn btn-create"
                             onClick={() => setCreateModalOpen(true)}
                         >
-                            Crear artículo
+                            Agregar Articulo
                         </button>
                     </div>
                     <div className="table-card">
@@ -177,20 +236,24 @@ export default function ContenedorPage() {
                             <tbody>
                                 {articulos.length > 0 &&
                                     articulos.map((articulo) => (
-                                        <tr key={articulo.codigo}
+                                        <tr key={String(articulo._id ?? articulo.codigo)}
                                             onClick={() => { abrirModal(articulo) }}
-                                            // onClick={() => { abrirModal(articulo) }}
                                             style={{ cursor: "pointer" }}
-
                                             draggable
                                             onDragStart={(event) => {
+                                                const payload = {
+                                                    articuloId: String(articulo._id ?? ""),
+                                                    codigo: articulo.codigo,
+                                                    contenedorActual: articulo.contenedor,
+                                                };
+
                                                 event.dataTransfer.setData(
                                                     "application/json",
-                                                    JSON.stringify({ articulo })
-                                                )
+                                                    JSON.stringify(payload)
+                                                );
                                                 setDragOver(true);
                                             }}
-
+                                            onDragEnd={() => setDragOver(false)}
                                         >
                                             <td>{articulo.codigo}</td>
                                             <td>{articulo.cantidad}</td>
@@ -269,17 +332,53 @@ export default function ContenedorPage() {
                         onClose={cerrarModal}
                         title={articuloSeleccionado ? `Articulo: ${articuloSeleccionado.codigo}` : "Articulo"}
                         actions={
-                            <button type="button" className="btn btn-create" onClick={cerrarModal}>
-                                Guardar
-                            </button>
+                            <>
+                                <button type="button" className="btn btn-create" onClick={guardarArticulo}>
+                                    Guardar
+                                </button>
+                                <button type="button" className="btn" onClick={cerrarModal}>
+                                    Cancelar
+                                </button>
+                            </>
                         }
                     >
                         {articuloSeleccionado && (
-                            <div>
-                                <p><strong>Codigo:</strong> <input id="codigo" type="text" placeholder={articuloSeleccionado.codigo}></input> </p> 
-                                <p><strong>Cantidad:</strong> <input id="cantidad" type="number" placeholder={articuloSeleccionado.cantidad.toString()}></input></p>
-                                <p><strong>Descripcion:</strong> <textarea id="descripcion" placeholder={articuloSeleccionado.descripcion}></textarea></p>
+                            <div className="modal-form">
+                                <p>
+                                    <label htmlFor="edit-codigo">
+                                        <strong>Código:</strong>
+                                        <input
+                                            id="edit-codigo"
+                                            type="text"
+                                            value={editArticulo.codigo}
+                                            onChange={handleEditArticuloChange("codigo")}
+                                        />
+                                    </label>
+                                </p>
+                                <p>
+                                    <label htmlFor="edit-cantidad">
+                                        <strong>Cantidad:</strong>
+                                        <input
+                                            id="edit-cantidad"
+                                            type="number"
+                                            min="1"
+                                            value={editArticulo.cantidad || ""}
+                                            onChange={handleEditArticuloChange("cantidad")}
+                                        />
+                                    </label>
+                                </p>
+                                <p>
+                                    <label htmlFor="edit-descripcion">
+                                        <strong>Descripción:</strong>
+                                        <textarea
+                                            id="edit-descripcion"
+                                            value={editArticulo.descripcion}
+                                            onChange={handleEditArticuloChange("descripcion")}
+                                        />
+                                    </label>
+                                </p>
                                 <p><strong>Contenedor:</strong> {articuloSeleccionado.contenedor}</p>
+                                {formError ? <p className="form-error">{formError}</p> : null}
                             </div>
                         )}
                     </Modal>
@@ -297,15 +396,16 @@ export default function ContenedorPage() {
                                     onDrop={(event) => {
                                         event.preventDefault();
 
-                                        const raw = event.dataTransfer.getData("application/json");
+                                                const raw = event.dataTransfer.getData("application/json");
                                         const data = JSON.parse(raw);
-                                        console.log(data);
                                         setDragOver(false);
 
                                         const props: IMoveArticuloProp = {
-                                            articulo: data,
-                                            contenedorNue: contenedor
-                                        }
+                                            articuloId: data.articuloId,
+                                            codigo: data.codigo,
+                                            contenedorActual: data.contenedorActual,
+                                            contenedorNue: contenedor,
+                                        };
                                         moveArticulo(props);
 
                                     }}

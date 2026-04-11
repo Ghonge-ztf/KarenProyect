@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { ObjectId } from "mongodb";
 import { getArtisulosCollection, getHistorialCollection } from "../utils/mongo";
 import { Artisulo, Historial } from "../utils/models/artisulo";
 
@@ -21,15 +22,8 @@ export const getArticulos = async (req: Request, res: Response) => {
 
         const datosC = await collection().find({ contenedor: query }).limit(25).toArray();
 
-        if (datosC.length < 1) {
-            console.log("no se esta recibiendo ningun dato de la base de datos")
-            return res.status(404).json({ menssage: "request errorneo" })
-
-        }
-        
         console.log(`getArticulos | Datos encontrados:${datosC.length}`)
         return res.status(200).json({ contenido: datosC })
-        
 
     } catch (error) {
         return res.status(500).json({ menssage: error.message })
@@ -46,12 +40,6 @@ export const getContenedores = async (req: Request, res: Response) => {
 
         const datosC = await collection().distinct("contenedor");
 
-
-        if (datosC.length < 1) {
-            console.log("no se esta recibiendo ningun dato de la base de datos")
-            return res.status(404).json({ menssage: "request errorneo" })
-        }
-
         console.log(`getContenedores | Datos encontrados:${datosC.length}`)
         return res.status(200).json({contenido: datosC});
 
@@ -65,44 +53,62 @@ export const getContenedores = async (req: Request, res: Response) => {
 
 export const moveArticulo = async (req: Request, res: Response) => {
 
-    try{
-        const { data, contenedorN } = req.body;
-        const articulo: Artisulo = data.articulo;
-        
-        const datosC: Historial = await historial().findOne({codigo: articulo.codigo});
+    try {
+        const { articuloId, contenedorN } = req.body;
 
-        if( data.articulo.codigo == undefined || contenedorN == undefined){
-            res.status(200).json({message: "error move articulo"});
+        if (!articuloId || typeof articuloId !== "string" || !contenedorN || typeof contenedorN !== "string" || !ObjectId.isValid(articuloId)) {
+            return res.status(400).json({ message: "Faltan datos requeridos o ID inválido para mover el artículo" });
         }
 
-        if(datosC == null){
+        const articuloActual = await collection().findOne({ _id: new ObjectId(articuloId) });
 
-            const productoHistorial: Historial = {
-                codigo: articulo.codigo,
-                cantidad: articulo.cantidad,
-                contenedor: []
-            } 
-
-            console.log("producto ",productoHistorial);
-
-            productoHistorial.contenedor.push(articulo.contenedor);
-            productoHistorial.contenedor.push(contenedorN);
-            const result = await historial().insertOne(productoHistorial);
-
-            result.acknowledged ? res.status(201).json({message: "historial registrado"}) : res.status(400).json({message: "Error al crear el historial de articulo"});
-
-        }else{
-            
-            datosC.contenedor.push(contenedorN)
-            const result = await historial().updateOne({codigo: articulo.codigo}, {$set: datosC});
-
-
-            result.matchedCount === 1 ? res.status(200).json({message: "historial registrado"}) : res.status(400).json({message: "Error al registrar el historial de articulo"});
+        if (!articuloActual) {
+            return res.status(404).json({ message: "Artículo no encontrado" });
         }
 
+        if (articuloActual.contenedor === contenedorN) {
+            return res.status(200).json({ message: "El artículo ya se encuentra en el contenedor destino" });
+        }
 
-    }catch(error){
-        return res.status(500).json({ menssage: error })
+        const updateResult = await collection().updateOne(
+            { _id: articuloActual._id },
+            { $set: { contenedor: contenedorN } }
+        );
+
+        if (updateResult.matchedCount === 0) {
+            return res.status(400).json({ message: "No se pudo mover el artículo" });
+        }
+
+        const historialExistente = await historial().findOne({ codigo: articuloActual.codigo });
+
+        if (!historialExistente) {
+            const nuevoHistorial: Historial = {
+                codigo: articuloActual.codigo,
+                cantidad: articuloActual.cantidad,
+                contenedor: [articuloActual.contenedor, contenedorN],
+            };
+
+            const result = await historial().insertOne(nuevoHistorial);
+            if (!result.acknowledged) {
+                return res.status(500).json({ message: "Error al crear el historial de artículo" });
+            }
+        } else {
+            const contenedoresHistorial = [...historialExistente.contenedor];
+            if (contenedoresHistorial[contenedoresHistorial.length - 1] !== contenedorN) {
+                contenedoresHistorial.push(contenedorN);
+            }
+            const result = await historial().updateOne(
+                { codigo: articuloActual.codigo },
+                { $set: { contenedor: contenedoresHistorial } }
+            );
+            if (result.matchedCount !== 1) {
+                return res.status(500).json({ message: "Error al actualizar el historial de artículo" });
+            }
+        }
+
+        return res.status(200).json({ message: "Artículo movido correctamente" });
+    } catch (error) {
+        return res.status(500).json({ menssage: error });
     }
+}
 
-} 
