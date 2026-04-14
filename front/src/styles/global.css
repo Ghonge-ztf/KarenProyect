@@ -106,22 +106,27 @@ h3 {
   justify-content: flex-end;
 }
 
-.contenedores-panel {
-  position: fixed;
-  right: 1.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 320px;
-}
 
 /* Tarjeta base reutilizable para bloques de contenido con fondo, borde redondeado y sombra suave. */
 .panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   padding: 1.5rem;
   border: 1px solid var(--border);
   border-radius: 24px;
   background: var(--surface);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow);
+  /* padding-bottom: 10px; */
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 /* Variante visual de panel con un fondo mas delicado para secciones secundarias o destacadas. */
@@ -147,7 +152,7 @@ h3 {
 .button-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.85rem;
+  gap: 3rem;
   align-items: stretch;
 }
 
@@ -294,6 +299,100 @@ h3 {
   font-weight: 600;
 }
 
+.search-panel {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.field-block {
+  display: grid;
+  gap: 0.45rem;
+  font-weight: 600;
+  color: var(--title-soft);
+}
+
+.field-block input,
+.field-block select,
+.field-block textarea,
+.modal-form input,
+.modal-form select,
+.modal-form textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(210, 217, 230, 0.95);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text-main);
+}
+
+.field-block textarea,
+.modal-form textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.search-results {
+  display: grid;
+  gap: 0.65rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.search-result-item {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(210, 217, 230, 0.95);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text-main);
+  text-align: left;
+}
+
+.search-result-item span:last-child {
+  color: var(--text-soft);
+  font-size: 0.94rem;
+}
+
+.search-result-item.is-active,
+.search-result-item:hover {
+  background: #fff6f8;
+  border-color: rgba(207, 136, 151, 0.32);
+}
+
+.empty-state {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.detail-stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.compact-table {
+  margin-top: 0.25rem;
+}
+
+.modal-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.modal-form p {
+  margin-bottom: 0;
+}
+
+.form-error {
+  margin: 0;
+  color: #b25467;
+  font-weight: 600;
+}
+
 /* Capa fija que oscurece y difumina el fondo cuando un modal esta abierto. */
 .modal-overlay {
   position: fixed;
@@ -405,5 +504,9 @@ h3 {
 
   .modal-actions > * {
     width: 100%;
+  }
+
+  .panel-header {
+    align-items: stretch;
   }
 }

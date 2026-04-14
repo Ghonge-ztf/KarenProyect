@@ -1,5 +1,5 @@
 import { MongoClient, Db, Collection } from "mongodb";
-import { Artisulo, Historial } from "./models/artisulo";
+import { Artisulo, Historial, Salida } from "./models/artisulo";
 
 let client: MongoClient | null = null;
 let database: Db | null = null;
@@ -33,6 +33,10 @@ export function getArtisulosCollection(): Collection<Artisulo> {
 
 export function getHistorialCollection(): Collection<Historial> {
   return getDatabase().collection<Historial>("Historial");
+}
+
+export function getSalidasCollection(): Collection<Salida> {
+  return getDatabase().collection<Salida>("Salidas");
 }
 
 export async function closeDatabase(): Promise<void> {

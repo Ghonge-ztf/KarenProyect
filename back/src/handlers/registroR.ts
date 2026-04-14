@@ -27,17 +27,19 @@ const parseCantidad = (value: unknown): number | null => {
 
 export const crearArticulo = async (req: Request, res: Response) => {
   try {
-    const { contenedor ,cantidad, codigo, descripcion } = req.body;
+    const { contenedor ,cantidad, codigo, descripcion, observacion } = req.body;
     const parsedCantidad = parseCantidad(cantidad);
     const codigoLimpio = normalizeString(codigo);
     const descripcionLimpia = normalizeString(descripcion);
     const contenedorLimpio = normalizeString(contenedor);
+    const observacionLimpio = normalizeString(observacion);
 
     if (
       parsedCantidad === null ||
       !codigoLimpio ||
       !descripcionLimpia ||
-      ! contenedorLimpio
+      !contenedorLimpio ||
+      !observacionLimpio
     ) {
       return res.status(400).json({
         message:
@@ -58,6 +60,7 @@ export const crearArticulo = async (req: Request, res: Response) => {
           $set: {
             cantidad: cantidadActualizada,
             descripcion: descripcionLimpia || articuloExistente.descripcion,
+            observacion: observacionLimpio || articuloExistente.observacion,
           },
         }
       );
@@ -71,6 +74,7 @@ export const crearArticulo = async (req: Request, res: Response) => {
         codigo: codigoLimpio,
         contenedor: contenedorLimpio,
         cantidad: cantidadActualizada,
+        observacion: observacionLimpio,
       });
     }
 
@@ -79,6 +83,7 @@ export const crearArticulo = async (req: Request, res: Response) => {
       cantidad: parsedCantidad,
       codigo: codigoLimpio,
       descripcion: descripcionLimpia,
+      observacion: observacionLimpio
     };
 
     const result = await collection().insertOne(nuevoArticulo);
@@ -129,6 +134,16 @@ export const actualizarArticulo = async (req: Request, res: Response) => {
           .json({ message: "Descripcion no puede quedar vacía" });
       }
       updates.descripcion = descripcionLimpia;
+    }
+
+    if (typeof req.body.observacion !== "undefined") {
+      const observacionLimpio = normalizeString(req.body.observacion);
+      if (!observacionLimpio) {
+        return res
+          .status(400)
+          .json({ message: "Descripcion no puede quedar vacía" });
+      }
+      updates.observacion = observacionLimpio;
     }
 
     if (Object.keys(updates).length === 0) {

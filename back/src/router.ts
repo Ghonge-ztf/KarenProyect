@@ -4,7 +4,15 @@ import {
   actualizarArticulo,
   eliminarArticulo,
 } from "./handlers/registroR";
-import { getArticulos, getContenedores, moveArticulo } from "./handlers/accionesR";
+import {
+  getArticuloDetalle,
+  getArticulos,
+  getContenedores,
+  moveArticulo,
+  registrarSalida,
+  searchArticulos,
+  searchContenedores,
+} from "./handlers/accionesR";
 
 const router = Router();
 
@@ -14,10 +22,14 @@ router.get("/", (_req, res) => {
 
 router.post("/articulos", crearArticulo);
 router.post("/articulos/mover", moveArticulo);
+router.post("/salidas", registrarSalida);
 router.put("/articulos/:id", actualizarArticulo);
 router.delete("/articulos/:id", eliminarArticulo);  
 router.get("/contenedores/articulos", getArticulos);
-router.get("/contenedores/todos", getContenedores)
+router.get("/contenedores/todos", getContenedores);
+router.get("/contenedores/buscar", searchContenedores);
+router.get("/articulos/buscar", searchArticulos);
+router.get("/articulos/detalle", getArticuloDetalle);
 
 
 //(req, res) => { res.send("en trabajo")}
